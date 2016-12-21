@@ -14,31 +14,30 @@ class Add(val ipfs: IPFSConnection) {
     @JvmOverloads fun file(file: File, name: String = "file", filename: String = name): NamedHash {
 
         return addGeneric {
-            if (file.isDirectory) {
-                // add directory
-                val body = RequestBody.create(MediaType.parse("Content-Disposition: file;"
-                         + " filename=\"" + URLEncoder.encode(file.name, "UTF-8") + "\";"
-                         + " Content-Type: application/x-directory;"
-                         + " Content-Transfer-Encoding: binary"),file.name)
-                it.addFormDataPart(name, filename, body)
-                // add sub-files and subdirectories
-                for (f: File in file.listFiles()) {
-                    writeToBuilder(it, f.name, f.name, f)
-                }
-            } else {
-                writeToBuilder(it, name, filename, file)
-            }
+            addFile(it, file, name, filename)
         }
 
     }
 
-//    private fun addFile(builder: MultipartBody.Builder, file: File, name: String, filename: String): NamedHash {
+    // this has to be outside the lambda because it is reentrant to handle subdirectory structures
+    private fun addFile(builder: MultipartBody.Builder, file: File, name: String, filename: String) {
 
-//    }
+        if (file.isDirectory) {
+            // add directory
+            val body = RequestBody.create(MediaType.parse("Content-Disposition: file;"
+                    + " filename=\"" + URLEncoder.encode(file.name, "UTF-8") + "\";"
+                    + " Content-Type: application/x-directory;"
+                    + " Content-Transfer-Encoding: binary"),file.name)
+            builder.addFormDataPart(name, filename, body)
+            // add files and subdirectories
+            for (f: File in file.listFiles()) {
+                addFile(builder, f, f.name, f.name)
+            }
+        } else {
+            val body = RequestBody.create(MediaType.parse("application/octet-stream"), file)
+            builder.addFormDataPart(name, filename, body)
+        }
 
-    private fun writeToBuilder(builder: MultipartBody.Builder, name: String, filename: String, file: File) {
-        val body = RequestBody.create(MediaType.parse("application/octet-stream"), file)
-        builder.addFormDataPart(name, filename, body)
     }
 
     @JvmOverloads fun string(text: String, name: String = "string", filename: String = name): NamedHash {
