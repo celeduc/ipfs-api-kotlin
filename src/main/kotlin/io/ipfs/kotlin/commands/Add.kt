@@ -34,7 +34,11 @@ class Add(val ipfs: IPFSConnection) {
                 addFile(builder, f, f.name, filename + "/" + f.name)
             }
         } else {
-            val body = RequestBody.create(MediaType.parse("application/octet-stream"), file)
+            val body = RequestBody.create(MediaType.parse("Content-Disposition: file;"
+                    + " filename=\"" + URLEncoder.encode(filename, "UTF-8") + "\";"
+                    + " name=\"" + URLEncoder.encode(name, "UTF-8") + "\";"
+                    + " Content-Type: application/octet-stream;"
+                    + " Content-Transfer-Encoding: binary"), file)
             builder.addFormDataPart(name, filename, body)
         }
 
