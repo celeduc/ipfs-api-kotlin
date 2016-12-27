@@ -31,7 +31,7 @@ class Add(val ipfs: IPFSConnection) {
             builder.addFormDataPart(name, filename, body)
             // add files and subdirectories
             for (f: File in file.listFiles()) {
-                addFile(builder, f, f.name, f.name)
+                addFile(builder, f, f.name, filename + "/" + f.name)
             }
         } else {
             val body = RequestBody.create(MediaType.parse("application/octet-stream"), file)
