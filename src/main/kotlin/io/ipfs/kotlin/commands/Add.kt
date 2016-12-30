@@ -61,6 +61,11 @@ class Add(val ipfs: IPFSConnection) {
 
         val response = ipfs.okHttpClient.newCall(request).execute().body()
         val result = adapter.fromJson(response.source())
+        System.out.println("addGeneric() response.charStream()")
+        response.charStream().readLines().forEach {
+            System.out.println(it)
+        }
+        System.out.println("addGeneric() result")
         System.out.println(result)
         response.close()
         return result
