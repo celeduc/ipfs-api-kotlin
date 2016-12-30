@@ -24,22 +24,17 @@ class Add(val ipfs: IPFSConnection) {
 
         if (file.isDirectory) {
             // add directory
-            val body = RequestBody.create(MediaType.parse("Content-Disposition: file;"
-                    + " filename=\"" + URLEncoder.encode(file.name, "UTF-8") + "\";"
-                    + " Content-Type: application/x-directory;"
-                    + " Content-Transfer-Encoding: binary"),file.name)
-            builder.addFormDataPart(name, filename, body)
+            builder.addPart(Headers.of("application/x-directory", "Content-Disposition: file", "filename=\""
+                    + URLEncoder.encode(filename, "UTF-8") + "\";", " Content-Transfer-Encoding: binary"),
+                    RequestBody.create(null, ""))
             // add files and subdirectories
             for (f: File in file.listFiles()) {
                 addFile(builder, f, f.name, filename + "/" + f.name)
             }
         } else {
-            val body = RequestBody.create(MediaType.parse("Content-Disposition: file;"
-                    + " filename=\"" + URLEncoder.encode(filename, "UTF-8") + "\";"
-                    + " name=\"" + URLEncoder.encode(name, "UTF-8") + "\";"
-                    + " Content-Type: application/octet-stream;"
-                    + " Content-Transfer-Encoding: binary"), file)
-            builder.addFormDataPart(name, filename, body)
+            builder.addPart(Headers.of("application/octet-stream", "Content-Disposition: file", "filename=\""
+                    + URLEncoder.encode(filename, "UTF-8") + "\";", " Content-Transfer-Encoding: binary"),
+                    RequestBody.create(null, file))
         }
 
     }

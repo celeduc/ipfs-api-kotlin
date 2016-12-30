@@ -50,20 +50,25 @@ class TestAdd() :BaseIPFSWebserverTest() {
 
         // create nested subdirectories
         val path = Files.createTempDirectory("temptestdir")
-        File.createTempFile("dirtemptestfile",null,path.toFile())
+        val dttf = File.createTempFile("dirtemptestfile", null, path.toFile())
+        dttf.writeText("Contents of temptestdir/dirtemptestfile")
         val subdirpath = Files.createDirectory(Paths.get(path.toString()+File.separator+"subdir"))
-        File.createTempFile("subdirtemptestfile",null,subdirpath.toFile())
-        File.createTempFile("dirtemptestfile2",null, path.toFile())
+        val sdttf = File.createTempFile("subdirtemptestfile", null,subdirpath.toFile())
+        sdttf.writeText("Contents of temptestdir/subdir/subdirtemptestfile")
+        val dttf2 = File.createTempFile("dirtemptestfile2", null, path.toFile())
+        dttf2.writeText("Contents of temptestdir/dirtemptestfile2")
 
-        val addString = ipfs.add.file(path.toFile())
+        val addString = ipfs.add.file(path.toFile(),path.fileName.toString())
 
         // assert
         assertThat(addString.Hash).isEqualTo("hashprobe")
         assertThat(addString.Name).isEqualTo("nameprobe")
 
-        val executedRequest = server.takeRequest();
-        assertThat(executedRequest.path).startsWith("/add");
-
+        val executedRequest = server.takeRequest()
+        val body = executedRequest.body.readUtf8()
+        System.out.println(body)
+        assertThat(executedRequest.path).startsWith("/add")
+        assertThat(body).containsPattern(""".*temptestdir.*""")
     }
 
 
