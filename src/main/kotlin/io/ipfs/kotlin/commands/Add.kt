@@ -60,12 +60,14 @@ class Add(val ipfs: IPFSConnection) {
                 .build();
 
         val response = ipfs.okHttpClient.newCall(request).execute().body()
-        val result = adapter.fromJson(response.source())
+        var result: NamedHash = NamedHash("nameprobe","hashprobe")
+
+//        val result = adapter.fromJson(response.source())
         System.out.println("addGeneric() response.charStream()")
         response.charStream().readLines().forEach {
             System.out.println(it)
         }
-        System.out.println("addGeneric() result")
+        System.out.println("addGeneric() result uninitialized")
         System.out.println(result)
         response.close()
         return result
